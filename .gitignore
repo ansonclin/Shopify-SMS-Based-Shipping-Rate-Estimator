@@ -1,9 +1,12 @@
 # Notes for internal use only
 PROBLEMS.md
+learning.md
 
 # Real customer data - never commit (per CLAUDE.md)
-SMS_Subscribers.csv
+# Wildcard covers every future signup export too (SMS_Subscribers2.csv, etc.)
+SMS_Subscribers*.csv
 data/sms_signups.csv
+data/rate_cache.json
 
 # Large third-party raw dataset used once to build area_code_reference.csv -
 # not original work, easily re-downloaded, too big to check in

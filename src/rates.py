@@ -1,14 +1,8 @@
 #5
 import pandas as pd
 from dotenv import load_dotenv
-import os 
-import requests 
-from load import load_signups
-from area_codes import add_area_code_column
-
-df = load_signups("SMS_Subscribers.csv")
-df = add_area_code_column(df)
-
+import os
+import requests
 
 load_dotenv()
 api_key = os.getenv("EASYPOST_API_KEY")
@@ -37,16 +31,9 @@ def get_rate_for_area_code(area_code):
 
     shipment = response.json()
 
+    rate_for_area_code = None
     for rate in shipment["rates"]:
         if rate["carrier"] == "USPS" and rate["service"] == "GroundAdvantage":
-            ground_advantage_rate = float(rate["rate"])
+            rate_for_area_code = float(rate["rate"])
 
-    return ground_advantage_rate
-
-print(get_rate_for_area_code("910"))
-
-rate_cache = {}
-for area_code in df["area_code"].unique()[:3]:
-    rate_cache[area_code] = get_rate_for_area_code(area_code)
-
-print(rate_cache)
+    return rate_for_area_code

@@ -28,6 +28,15 @@ but that's a post-MVP decision, not part of validating the idea.)
 - Weight the average by signup count per area code, not by unique area code
   count (a big cluster of nearby signups should dominate a handful of far
   ones — see PROJECT_NOTES.md for the worked example).
+- Domestic (US) only for now — Canadian signups are excluded from `main.py`
+  entirely. Reason: USPS Priority Mail International (the Canada-bound
+  service, since Ground Advantage is US-only) runs meaningfully higher than
+  domestic rates and skewed the first real weighted-average run ($10.66,
+  well above both candidate flat rates). The blended US+Canada average
+  PROJECT_NOTES.md describes is still a valid future metric, just not part
+  of the MVP's main output right now. The Canada-handling code in
+  `rates.py` (country lookup, service-level switching) is left in place,
+  unused, in case blended gets built later.
 
 ## Weighted average formula (generalizes to any number of area codes)
 The grouping is by area code, not by state or city, and it isn't chosen by

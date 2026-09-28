@@ -11,8 +11,8 @@ api_key = os.getenv("EASYPOST_API_KEY")
 reference_df = pd.read_csv("data/area_code_reference.csv", dtype = {"area_code": str, "representative_zip": str})
 
 def get_zip_for_area_code(area_code):
-    match = reference_df[reference_df["area_code"] == area_code]
-    return match["representative_zip"].iloc[0]
+    match = reference_df[reference_df["area_code"] == area_code]  # filter to the one row with this area code
+    return match["representative_zip"].iloc[0]  # pull the zip out of that single-row result
 
 def get_rate_for_area_code(area_code):
 
@@ -25,7 +25,7 @@ def get_rate_for_area_code(area_code):
         "shipment":{
             "to_address": {"zip": destination_zip, "country": "US"},
             "from_address": {"zip": "94122", "country": "US"},
-            "parcel": {"weight": 32, "length": 16, "width": 14.5, "height": 2}
+            "parcel": {"weight": 32, "length": 16, "width": 14, "height": 2}
         }
     })
 

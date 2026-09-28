@@ -1,6 +1,7 @@
 # Notes for internal use only
 PROBLEMS.md
 learning.md
+CLAUDE.md
 
 # Real customer data - never commit (per CLAUDE.md)
 # Wildcard covers every future signup export too (SMS_Subscribers2.csv, etc.)

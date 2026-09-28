@@ -4,10 +4,11 @@ import time
 
 from src.load import load_signups
 from src.area_codes import add_area_code_column
-from src.metrics import count_signups_by_area_code, calculate_weighted_average
+from src.metrics import count_signups_by_area_code, calculate_weighted_average, count_signups_by_rate, most_common_area_code_by_rate, calculate_spread
 from src.rates import get_rate_for_area_code, reference_df
+from src.chart import plot_rate_distribution
 
-df = load_signups("SMS_Subscribers2.csv")
+df = load_signups("SMS_Subscribers3.csv")
 df = add_area_code_column(df)
 
 # domestic-only for now: drop any signups whose area code maps to a Canadian
@@ -35,3 +36,15 @@ with open("data/rate_cache.json", "w") as f:
 
 weighted_average = calculate_weighted_average(counts, rate_cache)
 print(f"Signup-weighted average shipping cost: ${weighted_average:.2f}")
+
+signups_by_rate = count_signups_by_rate(counts, rate_cache)
+top_area_code_by_rate = most_common_area_code_by_rate(counts, rate_cache)
+std_dev, min_rate, max_rate = calculate_spread(counts, rate_cache)
+
+print("\nSignups by rate (highest to lowest):")
+for rate in sorted(signups_by_rate, reverse=True):
+    print(f"  ${rate:.2f}: {signups_by_rate[rate]} signups (most from area code {top_area_code_by_rate[rate]})")
+
+print(f"\nStd dev: ${std_dev:.2f}  |  Min: ${min_rate:.2f}  |  Max: ${max_rate:.2f}")
+
+plot_rate_distribution(signups_by_rate, weighted_average, std_dev, top_area_code_by_rate)

@@ -1,13 +1,7 @@
 #3
-import json
-
 import pandas as pd
 
-from load import load_signups
-from area_codes import add_area_code_column
-from rates import reference_df
-
-def count_signups_by_area_code(df): # total signups 
+def count_signups_by_area_code(df): # total signups
     count_amount = df["area_code"].value_counts()
     return count_amount
 
@@ -29,17 +23,43 @@ def count_signups_by_rate(counts, rate_cache):
             signups_by_rate[rate] = count
     return signups_by_rate
 
-df = load_signups("SMS_Subscribers2.csv")
-df = add_area_code_column(df)
-domestic_area_codes = set(reference_df[~reference_df["representative_zip"].str.contains(r"[A-Za-z]")]["area_code"])
-df = df[df["area_code"].isin(domestic_area_codes)]
-counts = count_signups_by_area_code(df)
 
-with open("data/rate_cache.json") as f:
-    rate_cache = json.load(f)
+def most_common_area_code_by_rate(counts, rate_cache):
+    top_area_code_by_rate = {}
+    for area_code, count in counts.items():
+        rate = rate_cache[area_code]
+        if rate not in top_area_code_by_rate:
+            top_area_code_by_rate[rate] = area_code # $5.00 : '415'
+        else:
+            curr_leader_area_code = top_area_code_by_rate[rate] # current most signups with this area code
+            if count > counts[curr_leader_area_code]:
+                top_area_code_by_rate[rate] = area_code
 
-result = pd.Series(count_signups_by_rate(counts,rate_cache))
-result = result.sort_index(ascending= False)
+    return top_area_code_by_rate
 
-print(result)
+def calculate_spread(counts, rate_cache):
+    """
+    Measures how far individual rates typically stray from the weighted average.
+
+    For each area code: (rate - average) squared, times signup count, summed
+    across all area codes = weighted_variance_sum. Dividing that by total
+    signups gives variance; taking the square root gives standard deviation,
+    back in dollars.
+    """
+    weighted_avg = calculate_weighted_average(counts, rate_cache)  # reference point to measure distance from
+    total_signups = counts.sum()  # denominator, same as in calculate_weighted_average
+
+    weighted_variance_sum = 0  # running total of "how far off, weighted by how many people" across all area codes
+    all_rates = []  # plain list of each area code's rate, so we can find min/max after the loop
+
+    for area_code, count in counts.items(): 
+        rate = rate_cache[area_code]  # this area code's rate
+        weighted_variance_sum += count * (rate - weighted_avg) ** 2  # (distance from average)^2, weighted by signups
+        all_rates.append(rate)  # collect the rate itself for min/max later
+
+    std_dev = (weighted_variance_sum / total_signups) ** 0.5  # variance -> std dev (square root)
+    min_rate = min(all_rates)  # cheapest rate anyone actually pays
+    max_rate = max(all_rates)  # most expensive rate anyone actually pays
+
+    return std_dev, min_rate, max_rate
 

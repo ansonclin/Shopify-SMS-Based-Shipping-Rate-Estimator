@@ -15,6 +15,7 @@ data/raw/
 # Secrets - EasyPost API key, etc. (per CLAUDE.md)
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
